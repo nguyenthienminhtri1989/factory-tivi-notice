@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum NoticeType {
+  TEXT
+  IMAGE
+  MIXED
+  DOCUMENT
+}
+
+enum NoticeLevel {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum FitMode {
+  cover
+  contain
+}
+
+enum AssetKind {
+  IMAGE
+  DOCUMENT
+  VIDEO
+  OTHER
+}
+
+enum AssetRole {
+  PRIMARY
+  ATTACHMENT
+  THUMBNAIL
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  ACTIVATE
+  DEACTIVATE
+}
+
+model Factory {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  name          String
+  description   String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  displayGroups DisplayGroup[]
+  users         UserFactory[]
+
+  @@index([isActive])
+}
+
+model DisplayGroup {
+  id          String          @id @default(cuid())
+  factoryId   String
+  code        String          @unique
+  name        String
+  description String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  factory     Factory         @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  devices     DisplayDevice[]
+  targets     NoticeTarget[]
+
+  @@index([factoryId])
+  @@index([isActive])
+}
+
+model DisplayDevice {
+  id             String       @id @default(cuid())
+  displayGroupId String
+  code           String       @unique
+  name           String
+  location       String?
+  isActive       Boolean      @default(true)
+  lastSeenAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  displayGroup   DisplayGroup @relation(fields: [displayGroupId], references: [id], onDelete: Cascade)
+  targets        NoticeDeviceTarget[]
+
+  @@index([displayGroupId])
+  @@index([isActive])
+}
+
+model User {
+  id           String           @id @default(cuid())
+  username     String           @unique
+  passwordHash String
+  fullName     String
+  role         UserRole         @default(EDITOR)
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  factories    UserFactory[]
+  created      Notice[]         @relation("NoticeCreatedBy")
+  updated      Notice[]         @relation("NoticeUpdatedBy")
+  auditLogs    NoticeAuditLog[]
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model UserFactory {
+  userId    String
+  factoryId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  factory   Factory @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+
+  @@id([userId, factoryId])
+  @@index([factoryId])
+}
+
+model Notice {
+  id              String           @id @default(cuid())
+  type            NoticeType       @default(TEXT)
+  title           String
+  content         String           @db.Text
+  level           NoticeLevel      @default(NORMAL)
+  durationSeconds Int              @default(30)
+  isActive        Boolean          @default(true)
+  sortOrder       Int              @default(0)
+  backgroundColor String           @default("#111827")
+  textColor       String           @default("#f9fafb")
+  imageUrl        String           @default("")
+  fitMode         FitMode          @default(cover)
+  startAt         DateTime?
+  endAt           DateTime?
+  createdById     String?
+  updatedById     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User?            @relation("NoticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy       User?            @relation("NoticeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  targets         NoticeTarget[]
+  deviceTargets   NoticeDeviceTarget[]
+  assets          NoticeAsset[]
+  auditLogs       NoticeAuditLog[]
+
+  @@index([isActive])
+  @@index([type])
+  @@index([level])
+  @@index([startAt, endAt])
+  @@index([sortOrder])
+}
+
+model NoticeTarget {
+  noticeId       String
+  displayGroupId String
+  notice         Notice       @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  displayGroup   DisplayGroup @relation(fields: [displayGroupId], references: [id], onDelete: Cascade)
+
+  @@id([noticeId, displayGroupId])
+  @@index([displayGroupId])
+}
+
+model NoticeDeviceTarget {
+  noticeId        String
+  displayDeviceId String
+  notice          Notice        @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  displayDevice   DisplayDevice @relation(fields: [displayDeviceId], references: [id], onDelete: Cascade)
+
+  @@id([noticeId, displayDeviceId])
+  @@index([displayDeviceId])
+}
+
+model NoticeAsset {
+  id             String    @id @default(cuid())
+  noticeId       String
+  kind           AssetKind
+  role           AssetRole @default(ATTACHMENT)
+  fileName       String
+  originalName   String?
+  mimeType       String
+  fileSize       Int?
+  url            String
+  thumbnailUrl   String?
+  width          Int?
+  height         Int?
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  notice         Notice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@index([noticeId])
+  @@index([kind])
+  @@index([role])
+}
+
+model NoticeAuditLog {
+  id        String      @id @default(cuid())
+  noticeId  String?
+  userId    String?
+  action    AuditAction
+  snapshot  Json?
+  createdAt DateTime    @default(now())
+  notice    Notice?     @relation(fields: [noticeId], references: [id], onDelete: SetNull)
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([noticeId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

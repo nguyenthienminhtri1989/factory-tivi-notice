@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản trị bảng thông báo TV</title>
+    <link rel="stylesheet" href="/admin/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Factory TV Notice</p>
+          <h1>Quản trị thông báo</h1>
+        </div>
+        <a class="display-link" href="/display/?group=xuong-a" target="_blank" rel="noreferrer">Mở màn hình TV</a>
+      </section>
+
+      <section class="workspace">
+        <form id="noticeForm" class="editor">
+          <input id="noticeId" type="hidden">
+          <div class="editor-head">
+            <h2 id="formTitle">Tạo thông báo</h2>
+            <button id="resetButton" type="button" class="ghost-button">Làm mới</button>
+          </div>
+
+          <label>
+            Tiêu đề
+            <input id="title" name="title" maxlength="80" placeholder="VD: THÔNG BÁO SẢN XUẤT">
+          </label>
+
+          <label>
+            Nội dung
+            <textarea id="content" name="content" rows="6" maxlength="500" placeholder="Nhập nội dung ngắn gọn, dễ đọc từ xa"></textarea>
+          </label>
+
+          <div class="grid-two">
+            <label>
+              Nhóm TV
+              <input id="displayGroup" name="displayGroup" value="xuong-a" placeholder="xuong-a">
+            </label>
+            <label>
+              Thứ tự
+              <input id="sortOrder" name="sortOrder" type="number" value="1">
+            </label>
+          </div>
+
+          <div class="grid-three">
+            <label>
+              Loại slide
+              <select id="type" name="type">
+                <option value="TEXT">Chữ</option>
+                <option value="IMAGE">Ảnh</option>
+                <option value="MIXED">Ảnh + chữ</option>
+              </select>
+            </label>
+            <label>
+              Mức độ
+              <select id="level" name="level">
+                <option value="NORMAL">Thường</option>
+                <option value="IMPORTANT">Quan trọng</option>
+                <option value="URGENT">Khẩn cấp</option>
+              </select>
+            </label>
+            <label>
+              Giây / slide
+              <input id="durationSeconds" name="durationSeconds" type="number" min="5" max="600" value="30">
+            </label>
+          </div>
+
+          <div class="grid-three">
+            <label>
+              Màu nền
+              <input id="backgroundColor" name="backgroundColor" type="color" value="#111827">
+            </label>
+            <label>
+              Màu chữ
+              <input id="textColor" name="textColor" type="color" value="#f9fafb">
+            </label>
+            <label class="checkbox-label">
+              <input id="isActive" name="isActive" type="checkbox" checked>
+              Đang hiển thị
+            </label>
+          </div>
+
+          <label>
+            Đường dẫn ảnh/poster
+            <input id="imageUrl" name="imageUrl" placeholder="Tạm thời nhập URL ảnh; giai đoạn sau sẽ có upload">
+          </label>
+
+          <label>
+            Cách fit ảnh
+            <select id="fitMode" name="fitMode">
+              <option value="cover">Phủ kín màn hình</option>
+              <option value="contain">Hiện trọn ảnh</option>
+            </select>
+          </label>
+
+          <div id="message" class="message" role="status"></div>
+
+          <div class="actions">
+            <button type="submit" class="primary-button">Lưu thông báo</button>
+          </div>
+        </form>
+
+        <section class="notice-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Danh sách slide</h2>
+              <p id="lastUpdated">Đang tải dữ liệu...</p>
+            </div>
+            <button id="refreshButton" type="button" class="ghost-button">Tải lại</button>
+          </div>
+          <div id="noticeList" class="notice-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/admin/app.js"></script>
+  </body>
+</html>

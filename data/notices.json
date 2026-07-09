@@ -1,0 +1,39 @@
+{
+  "updatedAt": "2026-07-09T03:46:12.688Z",
+  "notices": [
+    {
+      "id": "demo-welcome",
+      "type": "TEXT",
+      "title": "THÔNG BÁO SẢN XUẤT",
+      "content": "Dây chuyền 2 chuyển sang mã hàng PB-2026-07 từ 13:30 hôm nay. Vui lòng kiểm tra nguyên liệu trước khi vận hành.",
+      "displayGroup": "xuong-a",
+      "level": "IMPORTANT",
+      "durationSeconds": 30,
+      "isActive": true,
+      "sortOrder": 1,
+      "backgroundColor": "#0f172a",
+      "textColor": "#f8fafc",
+      "imageUrl": "",
+      "fitMode": "cover",
+      "createdAt": "2026-07-09T03:00:00.000Z",
+      "updatedAt": "2026-07-09T03:00:00.000Z"
+    },
+    {
+      "id": "demo-safety",
+      "type": "TEXT",
+      "title": "AN TOÀN LÀ TRÊN HẾT",
+      "content": "Tất cả công nhân bắt buộc mang đầy đủ bảo hộ lao động trước khi vào khu vực sản xuất.",
+      "displayGroup": "xuong-a",
+      "level": "URGENT",
+      "durationSeconds": 20,
+      "isActive": true,
+      "sortOrder": 2,
+      "backgroundColor": "#7f1d1d",
+      "textColor": "#fff7ed",
+      "imageUrl": "",
+      "fitMode": "cover",
+      "createdAt": "2026-07-09T03:00:00.000Z",
+      "updatedAt": "2026-07-09T03:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+﻿.appShell {
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  color: #172033;
+}
+
+.appShell h1,
+.appShell h2,
+.appShell p {
+  margin-top: 0;
+}
+
+.appShell h1 {
+  margin-bottom: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.14;
+}
+
+.appShell h2 {
+  margin-bottom: 0;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.topActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.displayLink,
+.primaryButton,
+.ghostButton,
+.smallButton,
+.tabs button,
+.tableList button {
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.displayLink,
+.primaryButton {
+  border: 0;
+  background: #0f766e;
+  color: #ffffff;
+  padding: 12px 16px;
+}
+
+.ghostButton {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  padding: 10px 14px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.statBox {
+  min-height: 92px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.statBox span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.statBox strong {
+  color: #172033;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #dbe3ef;
+}
+
+.tabs button {
+  min-height: 44px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #475569;
+  padding: 10px 14px;
+}
+
+.tabs button:hover,
+.tabs .activeTab {
+  border-bottom-color: #0f766e;
+  color: #0f766e;
+}
+
+.message {
+  min-height: 26px;
+  margin-bottom: 12px;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.workspace,
+.managementLayout {
+  display: grid;
+  grid-template-columns: minmax(380px, 500px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.editor,
+.noticePanel,
+.managerForm,
+.tablePanel {
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.panelHead p {
+  margin-bottom: 0;
+  color: #64748b;
+}
+
+.editor label,
+.managerForm label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.editor input,
+.editor select,
+.editor textarea,
+.managerForm input,
+.managerForm select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  padding: 11px 12px;
+}
+
+.editor textarea {
+  resize: vertical;
+}
+
+.editor input[type="color"] {
+  min-height: 44px;
+  padding: 5px;
+}
+
+.gridThree {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.checkboxLabel,
+.inlineCheck {
+  grid-template-columns: 20px 1fr !important;
+  align-items: center;
+}
+
+.checkboxLabel input,
+.inlineCheck input {
+  width: 18px !important;
+  height: 18px;
+}
+
+.groupPicker {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.labelText {
+  color: #334155;
+  font-weight: 600;
+}
+
+.helperText {
+  margin: 0;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkItem {
+  display: grid !important;
+  grid-template-columns: 18px 1fr;
+  gap: 9px !important;
+  align-items: start;
+  margin: 0 !important;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 10px;
+}
+
+.checkItem input {
+  width: 18px !important;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.checkItem small {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.noticeList,
+.tableList {
+  display: grid;
+  gap: 12px;
+}
+
+.noticeCard,
+.tableList article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 16px;
+}
+
+.noticeTitle,
+.tableList strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.noticeMeta,
+.noticeContent,
+.tableList span {
+  margin: 0;
+  color: #475569;
+}
+
+.noticeMeta {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.noticeActions,
+.tableList article > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.smallButton,
+.tableList button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  padding: 8px 10px;
+}
+
+.dangerButton,
+.tableList button:last-child {
+  color: #b91c1c;
+}
+
+.managerForm {
+  display: grid;
+  gap: 10px;
+}
+
+.managerForm .panelHead,
+.managerForm label {
+  margin-bottom: 0;
+}
+
+.tablePanel h2 {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1080px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace,
+  .managementLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .appShell {
+    width: min(100% - 20px, 1440px);
+  }
+
+  .topbar,
+  .panelHead {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .topActions,
+  .actions {
+    justify-content: stretch;
+  }
+
+  .topActions > *,
+  .actions > * {
+    text-align: center;
+    width: 100%;
+  }
+
+  .summaryGrid,
+  .gridThree,
+  .checkGrid,
+  .noticeCard,
+  .tableList article {
+    grid-template-columns: 1fr;
+  }
+
+  .noticeActions,
+  .tableList article > div:last-child {
+    justify-content: flex-start;
+  }
+}
+

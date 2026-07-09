@@ -1,0 +1,142 @@
+:root {
+  color-scheme: dark;
+  font-family: Tahoma, Arial, sans-serif;
+  background: #020617;
+  color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #020617;
+}
+
+.screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #111827;
+}
+
+.slide {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(42px, 7vw, 110px);
+  text-align: center;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+.slide-content {
+  display: grid;
+  gap: clamp(24px, 4vw, 54px);
+  width: min(90vw, 1500px);
+  justify-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: clamp(18px, 2.4vw, 34px);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 15ch;
+  font-size: clamp(64px, 9vw, 156px);
+  line-height: 1.02;
+  letter-spacing: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.body {
+  margin: 0;
+  max-width: 24ch;
+  font-size: clamp(42px, 5.8vw, 96px);
+  line-height: 1.16;
+  font-weight: 700;
+  white-space: pre-line;
+}
+
+.image-slide {
+  padding: 0;
+  background: #020617;
+}
+
+.image-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-slide.contain img {
+  object-fit: contain;
+}
+
+.mixed-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 5vw, 80px);
+  align-items: center;
+  width: min(94vw, 1680px);
+}
+
+.mixed-layout img {
+  width: 100%;
+  max-height: 74vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.loading,
+.empty {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: clamp(34px, 5vw, 72px);
+  font-weight: 700;
+}
+
+.statusbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 44px;
+  padding: 8px 18px;
+  background: rgba(2, 6, 23, 0.64);
+  color: #e2e8f0;
+  font-size: clamp(16px, 1.8vw, 24px);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .mixed-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .statusbar {
+    font-size: 16px;
+  }
+}
