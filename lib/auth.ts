@@ -33,7 +33,9 @@ function base64url(value: string | Buffer) {
 }
 
 function sign(value: string) {
-  return createHmac("sha256", getAuthSecret()).update(value).digest("base64url");
+  return createHmac("sha256", getAuthSecret())
+    .update(value)
+    .digest("base64url");
 }
 
 export function hashPassword(password: string) {
@@ -47,14 +49,17 @@ export function verifyPassword(password: string, storedHash: string) {
   if (method !== "scrypt" || !salt || !hash) return false;
   const calculated = scryptSync(password, salt, 64);
   const expected = Buffer.from(hash, "hex");
-  return expected.length === calculated.length && timingSafeEqual(expected, calculated);
+  return (
+    expected.length === calculated.length &&
+    timingSafeEqual(expected, calculated)
+  );
 }
 
 export function createSessionToken(user: AuthUser) {
   const payload: SessionPayload = {
     userId: user.id,
     role: user.role,
-    exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS
+    exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS,
   };
   const body = base64url(JSON.stringify(payload));
   return `${body}.${sign(body)}`;
@@ -65,8 +70,15 @@ export function verifySessionToken(token: string): SessionPayload | null {
   if (!body || !signature || sign(body) !== signature) return null;
 
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SessionPayload;
-    if (!payload.userId || !payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return null;
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as SessionPayload;
+    if (
+      !payload.userId ||
+      !payload.exp ||
+      payload.exp < Math.floor(Date.now() / 1000)
+    )
+      return null;
     return payload;
   } catch {
     return null;
@@ -78,9 +90,10 @@ export async function setSessionCookie(user: AuthUser) {
   cookieStore.set(SESSION_COOKIE, createSessionToken(user), {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: false,
     path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }
 
@@ -99,11 +112,22 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, username: true, fullName: true, role: true, isActive: true }
+    select: {
+      id: true,
+      username: true,
+      fullName: true,
+      role: true,
+      isActive: true,
+    },
   });
 
   if (!user?.isActive) return null;
-  return { id: user.id, username: user.username, fullName: user.fullName, role: user.role };
+  return {
+    id: user.id,
+    username: user.username,
+    fullName: user.fullName,
+    role: user.role,
+  };
 }
 
 export function canManageContent(role: UserRole) {
