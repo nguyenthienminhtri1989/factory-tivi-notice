@@ -94,6 +94,37 @@
   width: min(94vw, 1680px);
 }
 
+.documentSlide {
+  padding: clamp(24px, 4vh, 54px) clamp(24px, 4vw, 70px) clamp(64px, 8vh, 96px);
+  background: #0f172a;
+}
+
+.documentFrame {
+  width: 100%;
+  height: calc(100dvh - clamp(82px, 11vh, 132px));
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.documentCard {
+  display: grid;
+  gap: calc(clamp(18px, 3vw, 44px) * var(--slide-scale));
+  width: min(92vw, 1500px);
+  justify-items: center;
+  align-content: center;
+}
+
+.documentCard a {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  color: inherit;
+  padding: calc(10px * var(--slide-scale)) calc(22px * var(--slide-scale));
+  font-size: calc(clamp(20px, 2.8vw, 44px) * var(--slide-scale));
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .mixedLayout img {
   width: 100%;
   max-height: calc((100dvh - clamp(118px, 16vh, 190px)) * var(--slide-scale));

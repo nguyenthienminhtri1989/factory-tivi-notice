@@ -1,28 +1,29 @@
 {
-    "name": "factory-tv-notice",
-    "version": "0.2.0",
-    "private": true,
-    "description": "Bang thong bao TV noi bo cho xuong san xuat bang Next.js.",
-    "scripts": {
-        "dev": "next dev -H 0.0.0.0 -p 3003",
-        "build": "next build",
-        "start": "next start -H 0.0.0.0 -p 3003",
-        "prisma:generate": "prisma generate",
-        "prisma:migrate": "prisma migrate dev",
-        "prisma:deploy": "prisma migrate deploy",
-        "prisma:studio": "prisma studio"
-    },
-    "dependencies": {
-        "@prisma/client": "^6.19.3",
-        "next": "^15.0.0",
-        "prisma": "^6.19.3",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0"
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.0",
-        "@types/react": "^19.0.0",
-        "@types/react-dom": "^19.0.0",
-        "typescript": "^5.0.0"
-    }
+    "name":  "factory-tv-notice",
+    "version":  "0.2.0",
+    "private":  true,
+    "description":  "Bang thong bao TV noi bo cho xuong san xuat bang Next.js.",
+    "scripts":  {
+                    "dev":  "next dev -H 0.0.0.0 -p 3003",
+                    "build":  "next build",
+                    "start":  "next start -H 0.0.0.0 -p 3003",
+                    "prisma:generate":  "prisma generate",
+                    "prisma:migrate":  "prisma migrate dev",
+                    "prisma:deploy":  "prisma migrate deploy",
+                    "prisma:studio":  "prisma studio",
+                    "check:encoding":  "node scripts/check-encoding.mjs"
+                },
+    "dependencies":  {
+                         "@prisma/client":  "^6.19.3",
+                         "next":  "^15.0.0",
+                         "prisma":  "^6.19.3",
+                         "react":  "^19.0.0",
+                         "react-dom":  "^19.0.0"
+                     },
+    "devDependencies":  {
+                            "@types/node":  "^22.0.0",
+                            "@types/react":  "^19.0.0",
+                            "@types/react-dom":  "^19.0.0",
+                            "typescript":  "^5.0.0"
+                        }
 }

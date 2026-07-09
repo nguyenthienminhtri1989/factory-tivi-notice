@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./display.module.css";
@@ -17,16 +17,16 @@ type SlideStyle = CSSProperties & {
 };
 
 function levelLabel(level: Notice["level"]) {
-  if (level === "URGENT") return "Kháº©n cáº¥p";
-  if (level === "IMPORTANT") return "Quan trá»ng";
-  return "ThĂ´ng bĂ¡o";
+  if (level === "URGENT") return "Khẩn cấp";
+  if (level === "IMPORTANT") return "Quan trọng";
+  return "Thông báo";
 }
 
 export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCode: string; deviceCode?: string }) {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [clock, setClock] = useState("");
-  const [syncStatus, setSyncStatus] = useState("Äang Ä‘á»“ng bá»™");
+  const [syncStatus, setSyncStatus] = useState("Đang đồng bộ");
   const [slideScale, setSlideScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const lastSignatureRef = useRef("");
@@ -34,6 +34,13 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
   const fitBoxRef = useRef<HTMLDivElement | null>(null);
 
   const currentNotice = notices[currentIndex] || null;
+  const currentAsset = useMemo(
+    () => currentNotice?.assets.find((asset) => asset.role === "PRIMARY") || currentNotice?.assets[0] || null,
+    [currentNotice]
+  );
+  const mediaUrl = currentNotice?.imageUrl || currentAsset?.url || "";
+  const mediaIsImage = Boolean(mediaUrl && (currentNotice?.type === "IMAGE" || currentAsset?.kind === "IMAGE" || currentAsset?.mimeType.startsWith("image/")));
+  const mediaIsPdf = Boolean(mediaUrl && (currentAsset?.mimeType === "application/pdf" || mediaUrl.toLowerCase().endsWith(".pdf")));
 
   const slideStyle = useMemo<SlideStyle>(
     () => ({
@@ -83,18 +90,19 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
         await element.requestFullscreen();
       }
     } catch {
-      // TrĂ¬nh duyá»‡t TV thÆ°á»ng chá»‰ cho fullscreen sau thao tĂ¡c ngÆ°á»i dĂ¹ng.
+      // Trình duyệt TV thường chỉ cho fullscreen sau thao tác người dùng.
     }
   }
 
   useEffect(() => {
     async function loadNotices() {
       try {
-        const response = await fetch(`/api/display/${encodeURIComponent(groupCode)}/notices${deviceCode ? `?device=${encodeURIComponent(deviceCode)}` : ""}`, { cache: "no-store" });
-        if (!response.ok) throw new Error("KhĂ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u");
+        const query = deviceCode ? `?device=${encodeURIComponent(deviceCode)}` : "";
+        const response = await fetch(`/api/display/${encodeURIComponent(groupCode)}/notices${query}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Không tải được dữ liệu");
         const data = (await response.json()) as DisplayPayload;
         const nextSignature = JSON.stringify(data.notices || []);
-        setSyncStatus(`Äá»“ng bá»™: ${new Date(data.serverTime).toLocaleTimeString("vi-VN")}`);
+        setSyncStatus(`Đồng bộ: ${new Date(data.serverTime).toLocaleTimeString("vi-VN")}`);
 
         if (nextSignature !== lastSignatureRef.current) {
           lastSignatureRef.current = nextSignature;
@@ -102,7 +110,7 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
           setCurrentIndex(0);
         }
       } catch {
-        setSyncStatus("Máº¥t káº¿t ná»‘i, Ä‘ang giá»¯ ná»™i dung cÅ©");
+        setSyncStatus("Mất kết nối, đang giữ nội dung cũ");
       }
     }
 
@@ -169,20 +177,20 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
     <main className={styles.screen} onClick={() => requestFullscreen()}>
       {!isFullscreen ? (
         <button className={styles.fullscreenButton} type="button" onClick={requestFullscreen}>
-          Báº¥m Ä‘á»ƒ toĂ n mĂ n hĂ¬nh
+          Bấm để toàn màn hình
         </button>
       ) : null}
 
-      <section ref={slideRef} className={`${styles.slide} ${currentNotice?.type === "IMAGE" ? styles.imageSlide : ""} ${currentNotice?.fitMode === "contain" ? styles.contain : ""}`} style={slideStyle}>
-        {!currentNotice ? <p className={styles.empty}>ChÆ°a cĂ³ thĂ´ng bĂ¡o Ä‘ang hiá»ƒn thá»‹</p> : null}
+      <section ref={slideRef} className={`${styles.slide} ${currentNotice?.type === "IMAGE" && mediaIsImage ? styles.imageSlide : ""} ${currentNotice?.type === "DOCUMENT" ? styles.documentSlide : ""} ${currentNotice?.fitMode === "contain" ? styles.contain : ""}`} style={slideStyle}>
+        {!currentNotice ? <p className={styles.empty}>Chưa có thông báo đang hiển thị</p> : null}
 
-        {currentNotice?.type === "IMAGE" && currentNotice.imageUrl ? (
-          <img src={currentNotice.imageUrl} alt={currentNotice.title || "ThĂ´ng bĂ¡o"} />
+        {currentNotice?.type === "IMAGE" && mediaIsImage ? (
+          <img src={mediaUrl} alt={currentNotice.title || "Thông báo"} />
         ) : null}
 
-        {currentNotice?.type === "MIXED" && currentNotice.imageUrl ? (
+        {currentNotice?.type === "MIXED" && mediaUrl && mediaIsImage ? (
           <div ref={fitBoxRef} className={`${styles.fitBox} ${styles.mixedLayout}`}>
-            <img src={currentNotice.imageUrl} alt={currentNotice.title || "ThĂ´ng bĂ¡o"} />
+            <img src={mediaUrl} alt={currentNotice.title || "Thông báo"} />
             <div className={styles.slideContent}>
               <div className={styles.badge}>{levelLabel(currentNotice.level)}</div>
               <h1 className={styles.title}>{currentNotice.title}</h1>
@@ -191,7 +199,20 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
           </div>
         ) : null}
 
-        {currentNotice && (currentNotice.type === "TEXT" || (currentNotice.type !== "IMAGE" && !currentNotice.imageUrl)) ? (
+        {currentNotice?.type === "DOCUMENT" && mediaUrl ? (
+          mediaIsPdf ? (
+            <iframe className={styles.documentFrame} src={mediaUrl} title={currentNotice.title || "Tài liệu thông báo"} />
+          ) : (
+            <div ref={fitBoxRef} className={`${styles.fitBox} ${styles.documentCard}`}>
+              <div className={styles.badge}>{levelLabel(currentNotice.level)}</div>
+              <h1 className={styles.title}>{currentNotice.title || "Tài liệu thông báo"}</h1>
+              <p className={styles.body}>{currentNotice.content || currentAsset?.originalName || currentAsset?.fileName || "Tệp đã được tải lên hệ thống."}</p>
+              <a href={mediaUrl} target="_blank" rel="noreferrer">Mở tài liệu</a>
+            </div>
+          )
+        ) : null}
+
+        {currentNotice && (currentNotice.type === "TEXT" || (!mediaUrl && currentNotice.type !== "IMAGE")) ? (
           <div ref={fitBoxRef} className={`${styles.fitBox} ${styles.slideContent}`}>
             <div className={styles.badge}>{levelLabel(currentNotice.level)}</div>
             <h1 className={styles.title}>{currentNotice.title}</h1>
@@ -201,11 +222,10 @@ export default function DisplayClient({ groupCode, deviceCode = "" }: { groupCod
       </section>
 
       <footer className={styles.statusbar}>
-        <span>NhĂ³m: {groupCode}</span>
+        <span>{deviceCode ? `Nhóm: ${groupCode} - TV: ${deviceCode}` : `Nhóm: ${groupCode}`}</span>
         <span>{clock}</span>
         <span>{syncStatus}</span>
       </footer>
     </main>
   );
 }
-

@@ -266,6 +266,138 @@
   font-weight: 600;
 }
 
+.urlPanel {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  padding: 14px;
+}
+
+.urlPanel h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.urlList {
+  display: grid;
+  gap: 8px;
+}
+
+.urlItem {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.urlItem span {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.urlItem code {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.uploadPanel {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 16px;
+  border: 1px solid #ccfbf1;
+  border-radius: 8px;
+  background: #f0fdfa;
+  padding: 14px;
+}
+
+.uploadPanel h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.uploadHint {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filePicker {
+  margin: 0 !important;
+}
+
+.filePicker input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filePicker span {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid #0f766e;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f766e;
+  padding: 11px 12px;
+  cursor: pointer;
+}
+
+.assetList {
+  display: grid;
+  gap: 8px;
+}
+
+.assetItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid #99f6e4;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.assetItem strong,
+.assetItem span,
+.assetItem code {
+  display: block;
+}
+
+.assetItem strong {
+  color: #172033;
+  overflow-wrap: anywhere;
+}
+
+.assetItem span {
+  margin-top: 3px;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.assetItem code {
+  margin-top: 5px;
+  color: #475569;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -393,4 +525,5 @@
     justify-content: flex-start;
   }
 }
+
 

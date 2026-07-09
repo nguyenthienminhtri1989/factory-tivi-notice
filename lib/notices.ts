@@ -1,4 +1,4 @@
-﻿import type { Notice as DbNotice, NoticeAsset, Prisma } from "@prisma/client";
+﻿import type { AssetKind, AssetRole, Notice as DbNotice, NoticeAsset, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type NoticeType = "TEXT" | "IMAGE" | "MIXED" | "DOCUMENT";
@@ -30,8 +30,8 @@ export type Notice = {
 
 export type NoticeAssetPayload = {
   id: string;
-  kind: string;
-  role: string;
+  kind: AssetKind;
+  role: AssetRole;
   fileName: string;
   originalName: string | null;
   mimeType: string;
@@ -47,6 +47,10 @@ export type NoticeAssetPayload = {
 export type NoticeStore = {
   updatedAt: string;
   notices: Notice[];
+};
+
+export type NoticeAssetInput = Partial<Omit<NoticeAssetPayload, "id" | "createdAt">> & {
+  url: string;
 };
 
 export type NoticeInput = Partial<{
@@ -66,6 +70,7 @@ export type NoticeInput = Partial<{
   fitMode: NoticeFitMode;
   startAt: string | null;
   endAt: string | null;
+  assets: NoticeAssetInput[];
 }>;
 
 const noticeInclude = {
@@ -92,7 +97,7 @@ type NoticeWithRelations = Prisma.NoticeGetPayload<{ include: typeof noticeInclu
 
 const defaultFactory = {
   code: "default",
-  name: "NhĂ  mĂ¡y máº·c Ä‘á»‹nh"
+  name: "Nhà máy mặc định"
 };
 
 export async function readNoticeStore(): Promise<NoticeStore> {
@@ -185,6 +190,9 @@ export async function createNotice(input: NoticeInput): Promise<Notice> {
       },
       deviceTargets: {
         create: displayDevices.map((displayDevice) => ({ displayDeviceId: displayDevice.id }))
+      },
+      assets: {
+        create: normalized.assets.map((asset, index) => assetCreateData(asset, index))
       }
     },
     include: includeNoticeRelations()
@@ -211,6 +219,7 @@ export async function updateNotice(id: string, input: NoticeInput): Promise<Noti
   const notice = await prisma.$transaction(async (tx) => {
     await tx.noticeTarget.deleteMany({ where: { noticeId: id } });
     await tx.noticeDeviceTarget.deleteMany({ where: { noticeId: id } });
+    await tx.noticeAsset.deleteMany({ where: { noticeId: id } });
 
     return tx.notice.update({
       where: { id },
@@ -233,6 +242,9 @@ export async function updateNotice(id: string, input: NoticeInput): Promise<Noti
         },
         deviceTargets: {
           create: displayDevices.map((displayDevice) => ({ displayDeviceId: displayDevice.id }))
+        },
+        assets: {
+          create: normalized.assets.map((asset, index) => assetCreateData(asset, index))
         }
       },
       include: includeNoticeRelations()
@@ -278,7 +290,7 @@ export function normalizeNotice(input: NoticeInput, existing?: Notice): Notice {
     fitMode: input.fitMode === "contain" || input.fitMode === "cover" ? input.fitMode : existing?.fitMode || "cover",
     startAt: normalizeOptionalDate(input.startAt ?? existing?.startAt ?? null),
     endAt: normalizeOptionalDate(input.endAt ?? existing?.endAt ?? null),
-    assets: existing?.assets || [],
+    assets: normalizeNoticeAssets(input.assets ?? existing?.assets ?? []),
     createdAt: existing?.createdAt || now,
     updatedAt: now
   };
@@ -286,19 +298,19 @@ export function normalizeNotice(input: NoticeInput, existing?: Notice): Notice {
 
 export function validateNotice(notice: Notice): string | null {
   if (!notice.title && !notice.content && !notice.imageUrl && notice.assets.length === 0) {
-    return "Cáº§n nháº­p tiĂªu Ä‘á», ná»™i dung, Ä‘Æ°á»ng dáº«n áº£nh hoáº·c tá»‡p Ä‘Ă­nh kĂ¨m.";
+    return "Cần nhập tiêu đề, nội dung, đường dẫn ảnh hoặc tệp đính kèm.";
   }
 
   if (!/^#[0-9a-fA-F]{6}$/.test(notice.backgroundColor)) {
-    return "MĂ u ná»n pháº£i Ä‘Ăºng Ä‘á»‹nh dáº¡ng #RRGGBB.";
+    return "Màu nền phải đúng định dạng #RRGGBB.";
   }
 
   if (!/^#[0-9a-fA-F]{6}$/.test(notice.textColor)) {
-    return "MĂ u chá»¯ pháº£i Ä‘Ăºng Ä‘á»‹nh dáº¡ng #RRGGBB.";
+    return "Màu chữ phải đúng định dạng #RRGGBB.";
   }
 
   if (notice.startAt && notice.endAt && new Date(notice.startAt) > new Date(notice.endAt)) {
-    return "Thá»i gian báº¯t Ä‘áº§u khĂ´ng Ä‘Æ°á»£c sau thá»i gian káº¿t thĂºc.";
+    return "Thời gian bắt đầu không được sau thời gian kết thúc.";
   }
 
   return null;
@@ -397,6 +409,61 @@ function mapNotice(notice: NoticeWithRelations): Notice {
     createdAt: notice.createdAt.toISOString(),
     updatedAt: notice.updatedAt.toISOString()
   };
+}
+
+function assetCreateData(asset: NoticeAssetPayload, index: number) {
+  return {
+    kind: asset.kind,
+    role: asset.role,
+    fileName: asset.fileName,
+    originalName: asset.originalName,
+    mimeType: asset.mimeType,
+    fileSize: asset.fileSize,
+    url: asset.url,
+    thumbnailUrl: asset.thumbnailUrl,
+    width: asset.width,
+    height: asset.height,
+    sortOrder: asset.sortOrder ?? index
+  };
+}
+
+function normalizeNoticeAssets(assets: NoticeAssetInput[] | NoticeAssetPayload[]): NoticeAssetPayload[] {
+  const normalized: NoticeAssetPayload[] = [];
+
+  assets.forEach((asset, index) => {
+    const url = String(asset.url || "").trim();
+    if (!url) return;
+
+    const fileName = String(asset.fileName || url.split("/").pop() || "tep-thong-bao");
+    const mimeType = String(asset.mimeType || "");
+    const kind = isAssetKind(asset.kind) ? asset.kind : mimeType.startsWith("image/") ? "IMAGE" : "DOCUMENT";
+    const role = isAssetRole(asset.role) ? asset.role : index === 0 ? "PRIMARY" : "ATTACHMENT";
+
+    normalized.push({
+      id: "id" in asset && asset.id ? String(asset.id) : "",
+      kind,
+      role,
+      fileName,
+      originalName: asset.originalName ?? fileName,
+      mimeType: mimeType || "application/octet-stream",
+      fileSize: typeof asset.fileSize === "number" ? asset.fileSize : null,
+      url,
+      thumbnailUrl: asset.thumbnailUrl ?? null,
+      width: typeof asset.width === "number" ? asset.width : null,
+      height: typeof asset.height === "number" ? asset.height : null,
+      sortOrder: typeof asset.sortOrder === "number" ? asset.sortOrder : index,
+      createdAt: "createdAt" in asset && asset.createdAt ? String(asset.createdAt) : new Date().toISOString()
+    });
+  });
+
+  return normalized;
+}
+function isAssetKind(value: unknown): value is AssetKind {
+  return value === "IMAGE" || value === "DOCUMENT" || value === "VIDEO" || value === "OTHER";
+}
+
+function isAssetRole(value: unknown): value is AssetRole {
+  return value === "PRIMARY" || value === "ATTACHMENT" || value === "THUMBNAIL";
 }
 
 function mapAsset(asset: NoticeAsset): NoticeAssetPayload {

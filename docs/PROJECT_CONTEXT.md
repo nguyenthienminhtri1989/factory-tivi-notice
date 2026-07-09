@@ -201,3 +201,11 @@ pm run build pass. Chua chay migrate vi may hien tai chua duoc cau hinh database
 - Admin UI thêm tab `Tài khoản` để tạo tài khoản `ADMIN`, `EDITOR`, `VIEWER`; tài khoản `VIEWER` dùng cho trình duyệt Smart TV.
 - Khi deploy public internet, bắt buộc đặt `AUTH_SECRET` đủ dài trong `.env`; không dùng secret mặc định.
 - Kiểm thử: `npm run build` pass, route `/login` build thành công, middleware được build kèm app.
+
+
+## Cập nhật media upload
+
+- Admin có thể tải trực tiếp ảnh, PDF, Word, Excel, PowerPoint khi tạo/sửa thông báo.
+- File upload được lưu trong `public/uploads/notices/YYYY/MM`; database lưu metadata ở bảng `NoticeAsset`.
+- Màn hình TV hiển thị trực tiếp ảnh và PDF. Các file Office được lưu như tài liệu đính kèm; để trình chiếu đẹp trên Smart TV nên xuất sang ảnh hoặc PDF trước, hoặc bổ sung bước chuyển đổi Office sang PDF/ảnh ở server sau này.
+- API mới: `POST /api/uploads`, chỉ cho phép role `ADMIN` và `EDITOR`, giới hạn 30 MB mỗi file.

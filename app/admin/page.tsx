@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "./admin.module.css";
 import type { Notice, NoticeStore } from "@/lib/notices";
 import type { DisplayDevicePayload, DisplayGroupPayload, FactoryPayload } from "@/lib/admin-data";
@@ -22,6 +22,7 @@ type FormState = {
   backgroundColor: string;
   textColor: string;
   imageUrl: string;
+  assets: Notice["assets"];
   fitMode: Notice["fitMode"];
 };
 
@@ -84,6 +85,7 @@ const emptyForm: FormState = {
   backgroundColor: "#111827",
   textColor: "#f9fafb",
   imageUrl: "",
+  assets: [],
   fitMode: "cover"
 };
 
@@ -163,6 +165,8 @@ export default function AdminPage() {
   const [displayDevices, setDisplayDevices] = useState<DisplayDevicePayload[]>([]);
   const [users, setUsers] = useState<UserPayload[]>([]);
   const [message, setMessage] = useState<{ text: string; isError: boolean }>({ text: "", isError: false });
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [publicBaseUrl, setPublicBaseUrl] = useState("");
 
   const sortedNotices = useMemo(
     () => [...notices].sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.localeCompare(b.createdAt)),
@@ -178,6 +182,23 @@ export default function AdminPage() {
     () => displayDevices.filter((device) => device.isActive),
     [displayDevices]
   );
+
+  const tvUrlSuggestions = useMemo(() => {
+    const baseUrl = publicBaseUrl || "http://SERVER_IP:3003";
+    const groupUrls = form.displayGroups.map((code) => ({
+      key: `group-${code}`,
+      label: `Nhóm ${code}`,
+      url: `${baseUrl}/display?group=${encodeURIComponent(code)}`
+    }));
+    const deviceUrls = activeDisplayDevices
+      .filter((device) => form.displayDevices.includes(device.code))
+      .map((device) => ({
+        key: `device-${device.code}`,
+        label: `TV ${device.name}`,
+        url: `${baseUrl}/display?group=${encodeURIComponent(device.displayGroupCode)}&device=${encodeURIComponent(device.code)}`
+      }));
+    return [...groupUrls, ...deviceUrls];
+  }, [activeDisplayDevices, form.displayDevices, form.displayGroups, publicBaseUrl]);
 
   const activeNoticeCount = notices.filter((notice) => notice.isActive).length;
 
@@ -219,8 +240,58 @@ export default function AdminPage() {
     refreshAll().catch((error) => setMessage({ text: error.message, isError: true }));
   }, []);
 
+  useEffect(() => {
+    setPublicBaseUrl(window.location.origin);
+  }, []);
+
   function updateForm<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  async function uploadNoticeFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploadingFile(true);
+
+    try {
+      const response = await fetch("/api/uploads", { method: "POST", body: formData });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Không tải được tệp lên server.");
+
+      const asset = data.asset as Notice["assets"][number];
+      setForm((current) => {
+        const nextType = asset.kind === "IMAGE" ? current.title || current.content ? "MIXED" : "IMAGE" : "DOCUMENT";
+        return {
+          ...current,
+          type: nextType,
+          imageUrl: asset.kind === "IMAGE" || asset.mimeType === "application/pdf" ? asset.url : current.imageUrl || asset.url,
+          assets: [{ ...asset, id: asset.id || asset.url, createdAt: asset.createdAt || new Date().toISOString() }]
+        };
+      });
+      setMessage({ text: "Đã tải tệp lên server.", isError: false });
+    } catch (error) {
+      setMessage({ text: error instanceof Error ? error.message : "Có lỗi xảy ra khi tải tệp.", isError: true });
+    } finally {
+      setUploadingFile(false);
+    }
+  }
+
+  function removeNoticeAsset(assetUrl: string) {
+    setForm((current) => ({
+      ...current,
+      imageUrl: current.imageUrl === assetUrl ? "" : current.imageUrl,
+      assets: current.assets.filter((asset) => asset.url !== assetUrl)
+    }));
+  }
+
+  function formatFileSize(size: number | null) {
+    if (!size) return "";
+    if (size < 1024 * 1024) return Math.round(size / 1024) + " KB";
+    return (size / 1024 / 1024).toFixed(1) + " MB";
   }
 
   function toggleDisplayGroup(code: string) {
@@ -305,6 +376,7 @@ export default function AdminPage() {
       backgroundColor: notice.backgroundColor,
       textColor: notice.textColor,
       imageUrl: notice.imageUrl,
+      assets: notice.assets || [],
       fitMode: notice.fitMode
     });
     setMessage({ text: "Đang sửa thông báo đã chọn.", isError: false });
@@ -480,6 +552,26 @@ export default function AdminPage() {
               )}
             </div>
 
+
+            <section className={styles.urlPanel}>
+              <div>
+                <p className={styles.eyebrow}>URL mở trên TV</p>
+                <h3>Gợi ý theo nơi nhận đang chọn</h3>
+              </div>
+              {tvUrlSuggestions.length === 0 ? (
+                <p className={styles.helperText}>Chọn nhóm TV hoặc thiết bị TV để hệ thống gợi ý URL cần nhập trên trình duyệt Smart TV.</p>
+              ) : (
+                <div className={styles.urlList}>
+                  {tvUrlSuggestions.map((item) => (
+                    <div className={styles.urlItem} key={item.key}>
+                      <span>{item.label}</span>
+                      <code>{item.url}</code>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
             <div className={styles.gridThree}>
               <label>
                 Loại slide
@@ -524,9 +616,35 @@ export default function AdminPage() {
               Đang hiển thị
             </label>
 
+            <section className={styles.uploadPanel}>
+              <div>
+                <p className={styles.eyebrow}>Media</p>
+                <h3>Ảnh hoặc tài liệu phát lên TV</h3>
+                <p className={styles.uploadHint}>Hỗ trợ ảnh, PDF, Word, Excel và PowerPoint. Ảnh/PDF hiển thị trực tiếp tốt nhất trên Smart TV.</p>
+              </div>
+              <label className={styles.filePicker}>
+                <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={uploadNoticeFile} disabled={uploadingFile} />
+                <span>{uploadingFile ? "Đang tải tệp..." : "Chọn tệp từ máy tính"}</span>
+              </label>
+              {form.assets.length ? (
+                <div className={styles.assetList}>
+                  {form.assets.map((asset) => (
+                    <div className={styles.assetItem} key={asset.url}>
+                      <div>
+                        <strong>{asset.originalName || asset.fileName}</strong>
+                        <span>{asset.kind === "IMAGE" ? "Ảnh" : "Tài liệu"} {formatFileSize(asset.fileSize)}</span>
+                        <code>{asset.url}</code>
+                      </div>
+                      <button type="button" className={styles.smallButton} onClick={() => removeNoticeAsset(asset.url)}>Gỡ</button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </section>
+
             <label>
               Đường dẫn ảnh/poster/tài liệu
-              <input value={form.imageUrl} placeholder="Tạm thời nhập URL; giai đoạn sau sẽ có upload file" onChange={(event) => updateForm("imageUrl", event.target.value)} />
+              <input value={form.imageUrl} placeholder="Có thể nhập URL ngoài hoặc dùng tệp vừa upload" onChange={(event) => updateForm("imageUrl", event.target.value)} />
             </label>
 
             <label>
