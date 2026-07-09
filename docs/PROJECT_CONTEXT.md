@@ -209,3 +209,10 @@ pm run build pass. Chua chay migrate vi may hien tai chua duoc cau hinh database
 - File upload được lưu trong `public/uploads/notices/YYYY/MM`; database lưu metadata ở bảng `NoticeAsset`.
 - Màn hình TV hiển thị trực tiếp ảnh và PDF. Các file Office được lưu như tài liệu đính kèm; để trình chiếu đẹp trên Smart TV nên xuất sang ảnh hoặc PDF trước, hoặc bổ sung bước chuyển đổi Office sang PDF/ảnh ở server sau này.
 - API mới: `POST /api/uploads`, chỉ cho phép role `ADMIN` và `EDITOR`, giới hạn 30 MB mỗi file.
+
+
+## Cap nhat luu tru upload production
+
+- File upload moi luu vao thu muc co dinh qua bien `UPLOAD_DIR`, mac dinh Windows la `D:\TIVI-APP-DATA\uploads`.
+- API upload tra URL moi dang `/media/YYYY/MM/ten-file`; route `/media/[...path]` doc file truc tiep tu `UPLOAD_DIR`.
+- Route tuong thich `/uploads/notices/[...path]` giup cac thong bao cu van doc duoc file tu `UPLOAD_DIR` hoac `public/uploads/notices`.

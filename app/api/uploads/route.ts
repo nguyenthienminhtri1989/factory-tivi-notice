@@ -3,12 +3,11 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { requireApiRole } from "@/lib/api-auth";
+import { getUploadRoot, uploadPublicUrl } from "@/lib/upload-storage";
 
 export const runtime = "nodejs";
 
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "notices");
-
 const allowedExtensions = new Set([
   ".jpg",
   ".jpeg",
@@ -76,7 +75,7 @@ export async function POST(request: Request) {
 
   const now = new Date();
   const folder = path.join(
-    UPLOAD_DIR,
+    getUploadRoot(),
     String(now.getFullYear()),
     String(now.getMonth() + 1).padStart(2, "0")
   );
@@ -87,7 +86,7 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(filePath, buffer);
 
-  const publicUrl = `/uploads/notices/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${fileName}`;
+  const publicUrl = uploadPublicUrl([String(now.getFullYear()), String(now.getMonth() + 1).padStart(2, "0"), fileName]);
 
   return NextResponse.json({
     asset: {

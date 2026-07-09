@@ -24,6 +24,7 @@ Tạo file `.env`:
 ```env
 DATABASE_URL="postgresql://postgres:MAT_KHAU_POSTGRES@localhost:5432/tivi_app_db?schema=public"
 AUTH_SECRET="tao-mot-chuoi-bi-mat-rat-dai-toi-thieu-24-ky-tu"
+UPLOAD_DIR="D:\\TIVI-APP-DATA\\uploads"
 ```
 
 `AUTH_SECRET` dùng để ký session đăng nhập. Khi public ra internet không được để secret mặc định.
@@ -135,3 +136,19 @@ npm run build
 pm2 restart tivi-app
 pm2 save
 ```
+
+## 10. Thu muc upload co dinh
+
+Tao thu muc luu anh/tai lieu upload ngoai source code:
+
+```powershell
+New-Item -ItemType Directory -Force D:\TIVI-APP-DATA\uploads
+```
+
+Cau hinh trong `.env`:
+
+```env
+UPLOAD_DIR="D:\\TIVI-APP-DATA\\uploads"
+```
+
+Tu sau thay doi nay, file moi upload se co URL dang `/media/YYYY/MM/ten-file.png`. Cac URL cu dang `/uploads/notices/YYYY/MM/ten-file.png` van duoc route tuong thich doc tu thu muc upload moi hoac thu muc `public/uploads/notices` cu.
